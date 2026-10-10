@@ -1,0 +1,1075 @@
+<!DOCTYPE html>
+<html lang="en" class="dark scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aditya Patil | Cybersecurity Portfolio & Lab Writeups</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        cyber: {
+                            black: '#0a0d14',
+                            dark: '#101522',
+                            card: '#161d2e',
+                            border: '#243049',
+                            neon: '#00ffaa',
+                            cyan: '#00e5ff',
+                            red: '#ff3366',
+                            purple: '#9d4edd',
+                            text: '#cbd5e1'
+                        }
+                    },
+                    fontFamily: {
+                        mono: ['JetBrains Mono', 'Fira Code', 'monospace'],
+                        sans: ['Inter', 'sans-serif']
+                    }
+                }
+            }
+        }
+    </script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+    
+    <style>
+        /* Custom scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #0a0d14;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #243049;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #00ffaa;
+        }
+
+        /* Cyber Glow Effects */
+        .glow-neon {
+            box-shadow: 0 0 15px rgba(0, 255, 170, 0.25);
+        }
+        .glow-cyan {
+            box-shadow: 0 0 15px rgba(0, 229, 255, 0.25);
+        }
+        .text-glow-neon {
+            text-shadow: 0 0 8px rgba(0, 255, 170, 0.6);
+        }
+        .text-glow-cyan {
+            text-shadow: 0 0 8px rgba(0, 229, 255, 0.6);
+        }
+
+        /* Scanline Overlay Effect */
+        .scanline-overlay {
+            background: linear-gradient(
+                to bottom,
+                rgba(255,255,255,0),
+                rgba(255,255,255,0) 50%,
+                rgba(0, 0, 0, 0.3) 50%,
+                rgba(0, 0, 0, 0.3)
+            );
+            background-size: 100% 4px;
+        }
+
+        /* Tech Grid Background */
+        .bg-grid {
+            background-size: 30px 30px;
+            background-image: 
+                linear-gradient(to right, rgba(36, 48, 73, 0.3) 1px, transparent 1px),
+                linear-gradient(to bottom, rgba(36, 48, 73, 0.3) 1px, transparent 1px);
+        }
+
+        /* Terminal blinking cursor */
+        .cursor-blink::after {
+            content: '█';
+            animation: blink 1s infinite;
+            margin-left: 2px;
+            color: #00ffaa;
+        }
+        @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0; }
+        }
+
+        #matrix-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 0;
+            opacity: 0.08;
+        }
+    </style>
+</head>
+<body class="bg-cyber-black text-cyber-text font-sans selection:bg-cyber-neon selection:text-cyber-black relative overflow-x-hidden min-h-screen">
+
+    <canvas id="matrix-canvas"></canvas>
+
+    <header class="sticky top-0 z-40 bg-cyber-black/85 backdrop-blur-md border-b border-cyber-border/60 transition-all">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-16">
+                <!-- Logo / Hostname -->
+                <a href="#" class="font-mono font-bold text-lg text-cyber-neon hover:text-cyber-cyan transition-colors flex items-center space-x-2">
+                    <i class="fa-solid font-mono text-cyber-cyan">&gt;_</i>
+                    <span class="tracking-wider">ap@sec-ops:~$</span>
+                </a>
+
+                <!-- Desktop Navigation Links -->
+                <nav class="hidden md:flex space-x-8 text-sm font-mono font-medium">
+                    <a href="#about" class="hover:text-cyber-neon transition-colors"><span class="text-cyber-cyan">01.</span> /about</a>
+                    <a href="#terminal" class="hover:text-cyber-neon transition-colors"><span class="text-cyber-cyan">02.</span> /terminal</a>
+                    <a href="#skills" class="hover:text-cyber-neon transition-colors"><span class="text-cyber-cyan">03.</span> /skills</a>
+                    <a href="#labs" class="hover:text-cyber-neon transition-colors"><span class="text-cyber-cyan">04.</span> /labs</a>
+                    <a href="#writeups" class="hover:text-cyber-neon transition-colors"><span class="text-cyber-cyan">05.</span> /writeups</a>
+                    <a href="#contact" class="hover:text-cyber-neon transition-colors"><span class="text-cyber-cyan">06.</span> /contact</a>
+                </nav>
+
+                <!-- Header Actions -->
+                <div class="hidden md:flex items-center space-x-4">
+                    <button id="deploy-guide-btn" onclick="toggleModal('deploy-modal')" class="border border-cyber-cyan/40 hover:border-cyber-cyan text-cyber-cyan hover:bg-cyber-cyan/10 px-3 py-1.5 rounded-md text-xs font-mono transition-all flex items-center space-x-2">
+                        <i class="fa-brands fa-github"></i>
+                        <span>Deploy Guide</span>
+                    </button>
+                    <a href="#contact" class="bg-cyber-neon text-cyber-black font-mono font-bold hover:bg-cyber-neon/90 px-4 py-1.5 rounded-md text-xs transition-all shadow-md hover:shadow-cyber-neon/20">
+                        Hire / Connect
+                    </a>
+                </div>
+
+                <!-- Mobile Menu Toggle Button -->
+                <div class="md:hidden flex items-center space-x-2">
+                    <button id="deploy-guide-btn-mobile" onclick="toggleModal('deploy-modal')" class="border border-cyber-cyan/40 text-cyber-cyan p-2 rounded-md text-xs">
+                        <i class="fa-brands fa-github"></i>
+                    </button>
+                    <button id="mobile-menu-btn" class="p-2 rounded-md text-cyber-text hover:text-cyber-neon focus:outline-none">
+                        <i class="fa-solid fa-bars text-xl"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Mobile Menu Dropdown -->
+        <div id="mobile-menu" class="hidden md:hidden bg-cyber-dark border-b border-cyber-border px-4 pt-2 pb-6 space-y-3 font-mono text-sm">
+            <a href="#about" class="block py-2 text-cyber-text hover:text-cyber-neon"><span class="text-cyber-cyan">01.</span> /about</a>
+            <a href="#terminal" class="block py-2 text-cyber-text hover:text-cyber-neon"><span class="text-cyber-cyan">02.</span> /terminal</a>
+            <a href="#skills" class="block py-2 text-cyber-text hover:text-cyber-neon"><span class="text-cyber-cyan">03.</span> /skills</a>
+            <a href="#labs" class="block py-2 text-cyber-text hover:text-cyber-neon"><span class="text-cyber-cyan">04.</span> /labs</a>
+            <a href="#writeups" class="block py-2 text-cyber-text hover:text-cyber-neon"><span class="text-cyber-cyan">05.</span> /writeups</a>
+            <a href="#contact" class="block py-2 text-cyber-text hover:text-cyber-neon"><span class="text-cyber-cyan">06.</span> /contact</a>
+        </div>
+    </header>
+
+    <main class="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-24 pt-10 pb-20 bg-grid">
+        <section id="about" class="pt-6 md:pt-12">
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
+                <!-- Hero Bio Column -->
+                <div class="lg:col-span-7 space-y-6">
+                    <div class="inline-flex items-center space-x-2 px-3 py-1 rounded-full bg-cyber-neon/10 border border-cyber-neon/30 text-cyber-neon text-xs font-mono">
+                        <span class="w-2 h-2 rounded-full bg-cyber-neon animate-ping"></span>
+                        <span>Available for Security Roles & Internships</span>
+                    </div>
+
+                    <h1 class="text-4xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight text-white leading-tight">
+                        Aditya Patil
+                        <span class="block text-transparent bg-clip-text bg-gradient-to-r from-cyber-neon via-cyber-cyan to-cyber-purple text-2xl sm:text-3xl lg:text-4xl font-mono mt-2">
+                            Cybersecurity Student & Aspiring Security Analyst
+                        </span>
+                    </h1>
+
+                    <p class="text-cyber-text text-base sm:text-lg leading-relaxed max-w-2xl font-light">
+                        Passionate about defensive security operations (SOC), network penetration testing, and home lab research. Focused on practical vulnerability analysis, SIEM detection engineering, and breaking down complex attack vectors.
+                    </p>
+
+                    <!-- Quick Tech Badges -->
+                    <div class="flex flex-wrap gap-2 pt-2">
+                        <span class="px-2.5 py-1 bg-cyber-dark border border-cyber-border rounded text-xs font-mono"><i class="fa-brands fa-linux text-cyber-cyan mr-1"></i> Linux / Bash</span>
+                        <span class="px-2.5 py-1 bg-cyber-dark border border-cyber-border rounded text-xs font-mono"><i class="fa-solid fa-network-wired text-cyber-neon mr-1"></i> Wireshark & Nmap</span>
+                        <span class="px-2.5 py-1 bg-cyber-dark border border-cyber-border rounded text-xs font-mono"><i class="fa-brands fa-python text-cyber-purple mr-1"></i> Python Automation</span>
+                        <span class="px-2.5 py-1 bg-cyber-dark border border-cyber-border rounded text-xs font-mono"><i class="fa-solid fa-shield-halved text-cyber-red mr-1"></i> SIEM & Log Analysis</span>
+                    </div>
+
+                    <!-- CTA Buttons -->
+                    <div class="flex flex-wrap gap-4 pt-4 font-mono text-sm">
+                        <a href="#labs" class="bg-cyber-neon text-cyber-black font-bold px-6 py-3 rounded-lg hover:bg-cyber-neon/90 transition-all shadow-lg hover:shadow-cyber-neon/20 flex items-center space-x-2">
+                            <i class="fa-solid fa-flask"></i>
+                            <span>View Home Labs</span>
+                        </a>
+                        <a href="#writeups" class="border border-cyber-cyan text-cyber-cyan hover:bg-cyber-cyan/10 px-6 py-3 rounded-lg transition-all flex items-center space-x-2">
+                            <i class="fa-solid fa-file-code"></i>
+                            <span>Read CTF Writeups</span>
+                        </a>
+                        <a href="https://github.com" target="_blank" class="border border-cyber-border text-cyber-text hover:border-white px-4 py-3 rounded-lg transition-all">
+                            <i class="fa-brands fa-github text-lg"></i>
+                        </a>
+                        <a href="https://linkedin.com" target="_blank" class="border border-cyber-border text-cyber-text hover:border-white px-4 py-3 rounded-lg transition-all">
+                            <i class="fa-brands fa-linkedin text-lg"></i>
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Profile Card / Quick Stats Column -->
+                <div class="lg:col-span-5">
+                    <div class="bg-cyber-card border border-cyber-border rounded-xl p-6 relative overflow-hidden shadow-2xl glow-cyan/10">
+                        <div class="absolute top-0 right-0 p-4 opacity-10 text-cyber-cyan text-8xl">
+                            <i class="fa-solid fa-user-shield"></i>
+                        </div>
+
+                        <!-- Card Header -->
+                        <div class="flex items-center space-x-4 border-b border-cyber-border pb-4 mb-4">
+                            <div class="w-16 h-16 rounded-lg bg-cyber-dark border border-cyber-neon/40 flex items-center justify-center text-cyber-neon text-2xl font-mono font-bold">
+                                AP
+                            </div>
+                            <div>
+                                <h3 class="text-white font-bold text-lg">Aditya Patil</h3>
+                                <p class="text-xs font-mono text-cyber-cyan"><i class="fa-solid fa-location-dot mr-1"></i> India | Cyber Security</p>
+                                <p class="text-xs font-mono text-emerald-400 mt-1"><i class="fa-solid fa-shield-virus mr-1"></i> Target: Security operations & PenTesting</p>
+                            </div>
+                        </div>
+
+                        <!-- Quick Statistics -->
+                        <div class="grid grid-cols-2 gap-3 font-mono text-xs mb-6">
+                            <div class="bg-cyber-dark/80 p-3 rounded border border-cyber-border/60">
+                                <span class="text-cyber-text block">TryHackMe Rank</span>
+                                <span class="text-cyber-neon font-bold text-base">Top 5%</span>
+                            </div>
+                            <div class="bg-cyber-dark/80 p-3 rounded border border-cyber-border/60">
+                                <span class="text-cyber-text block">CTF Write-ups</span>
+                                <span class="text-cyber-cyan font-bold text-base">18+ Published</span>
+                            </div>
+                            <div class="bg-cyber-dark/80 p-3 rounded border border-cyber-border/60">
+                                <span class="text-cyber-text block">Active Home Labs</span>
+                                <span class="text-cyber-purple font-bold text-base">3 Deployed</span>
+                            </div>
+                            <div class="bg-cyber-dark/80 p-3 rounded border border-cyber-border/60">
+                                <span class="text-cyber-text block">Certs Progress</span>
+                                <span class="text-cyber-red font-bold text-base">Security+ / eJPT</span>
+                            </div>
+                        </div>
+
+                        <!-- Mini Activity Status -->
+                        <div class="space-y-2 font-mono text-xs">
+                            <div class="flex justify-between items-center text-cyber-text">
+                                <span><i class="fa-solid fa-code-commit text-cyber-neon mr-1"></i> Active Project:</span>
+                                <span class="text-white">Active Directory Lab</span>
+                            </div>
+                            <div class="flex justify-between items-center text-cyber-text">
+                                <span><i class="fa-solid fa-terminal text-cyber-cyan mr-1"></i> Current Focus:</span>
+                                <span class="text-white">SIEM Detection Rules</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="terminal" class="space-y-4">
+            <div class="flex items-center justify-between">
+                <h2 class="text-2xl font-bold font-mono text-white flex items-center space-x-2">
+                    <span class="text-cyber-neon">&gt;</span>
+                    <span>Interactive Shell Sandbox</span>
+                </h2>
+                <span class="text-xs font-mono text-cyber-text hidden sm:inline-block">Type <code class="text-cyber-neon">help</code> or click commands below</span>
+            </div>
+
+            <!-- Terminal Window Box -->
+            <div class="bg-cyber-dark border border-cyber-border rounded-xl overflow-hidden shadow-2xl font-mono text-sm border-t-2 border-t-cyber-neon">
+                <!-- Terminal Header Bar -->
+                <div class="bg-cyber-card px-4 py-2.5 border-b border-cyber-border flex items-center justify-between">
+                    <div class="flex items-center space-x-2">
+                        <span class="w-3 h-3 rounded-full bg-red-500 inline-block cursor-pointer" onclick="runCommand('clear')"></span>
+                        <span class="w-3 h-3 rounded-full bg-yellow-500 inline-block"></span>
+                        <span class="w-3 h-3 rounded-full bg-green-500 inline-block"></span>
+                        <span class="ml-2 text-xs text-cyber-text opacity-70">bash - aditya@portfolio:~</span>
+                    </div>
+                    <div class="flex space-x-2 text-xs">
+                        <button onclick="runCommand('help')" class="text-cyber-cyan hover:underline">help</button>
+                        <button onclick="runCommand('clear')" class="text-cyber-text hover:text-white">clear</button>
+                    </div>
+                </div>
+
+                <!-- Interactive Command Presets -->
+                <div class="bg-cyber-black/60 px-4 py-2 border-b border-cyber-border/60 flex flex-wrap gap-2 text-xs">
+                    <span class="text-cyber-text self-center mr-1">Quick Commands:</span>
+                    <button onclick="runCommand('whoami')" class="px-2 py-1 rounded bg-cyber-card hover:bg-cyber-border text-cyber-neon border border-cyber-border">whoami</button>
+                    <button onclick="runCommand('skills')" class="px-2 py-1 rounded bg-cyber-card hover:bg-cyber-border text-cyber-cyan border border-cyber-border">skills</button>
+                    <button onclick="runCommand('projects')" class="px-2 py-1 rounded bg-cyber-card hover:bg-cyber-border text-cyber-purple border border-cyber-border">projects</button>
+                    <button onclick="runCommand('certs')" class="px-2 py-1 rounded bg-cyber-card hover:bg-cyber-border text-cyber-neon border border-cyber-border">certs</button>
+                    <button onclick="runCommand('contact')" class="px-2 py-1 rounded bg-cyber-card hover:bg-cyber-border text-cyber-red border border-cyber-border">contact</button>
+                </div>
+
+                <!-- Terminal Output Window -->
+                <div id="terminal-output" class="p-4 min-h-[220px] max-h-[360px] overflow-y-auto space-y-2 leading-relaxed text-cyber-text">
+                    <div>
+                        <span class="text-cyber-neon font-bold">Welcome to Aditya's Interactive Cybersecurity Terminal v1.0.4</span><br>
+                        Type <span class="text-cyber-cyan font-bold">help</span> to view available system commands. Try exploring my background interactively!
+                    </div>
+                </div>
+
+                <!-- Terminal Command Prompt Line -->
+                <div class="p-4 pt-2 bg-cyber-dark border-t border-cyber-border/40 flex items-center space-x-2">
+                    <span class="text-cyber-neon font-bold">aditya@sec-lab:~$</span>
+                    <input type="text" id="terminal-input" class="bg-transparent border-none outline-none flex-grow text-white font-mono focus:ring-0 text-sm" placeholder="type a command here (e.g. whoami, skills)..." autofocus autocomplete="off">
+                </div>
+            </div>
+        </section>
+
+        <section id="skills" class="space-y-8">
+            <div class="border-l-4 border-cyber-neon pl-4">
+                <h2 class="text-3xl font-extrabold text-white tracking-tight">Core Competencies & Tooling</h2>
+                <p class="text-cyber-text text-sm font-mono mt-1">// Technical skills acquired through home lab environments & CTF platforms</p>
+            </div>
+
+            <!-- Skills Matrix Cards -->
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                <!-- Systems & OS -->
+                <div class="bg-cyber-card border border-cyber-border rounded-xl p-5 hover:border-cyber-neon/50 transition-all space-y-4">
+                    <div class="flex items-center space-x-3 text-cyber-neon">
+                        <i class="fa-solid fa-terminal text-2xl"></i>
+                        <h3 class="font-bold text-white text-lg">Systems & OS</h3>
+                    </div>
+                    <ul class="space-y-2 text-sm font-mono">
+                        <li class="flex justify-between items-center">
+                            <span>Linux CLI & Administration</span>
+                            <span class="text-cyber-neon text-xs">Advanced</span>
+                        </li>
+                        <li class="flex justify-between items-center">
+                            <span>Windows Active Directory</span>
+                            <span class="text-cyber-cyan text-xs">Intermediate</span>
+                        </li>
+                        <li class="flex justify-between items-center">
+                            <span>Bash Scripting</span>
+                            <span class="text-cyber-neon text-xs">Advanced</span>
+                        </li>
+                        <li class="flex justify-between items-center">
+                            <span>Virtualization (Proxmox/VirtualBox)</span>
+                            <span class="text-cyber-cyan text-xs">Intermediate</span>
+                        </li>
+                    </ul>
+                </div>
+
+                <!-- Security Tools -->
+                <div class="bg-cyber-card border border-cyber-border rounded-xl p-5 hover:border-cyber-cyan/50 transition-all space-y-4">
+                    <div class="flex items-center space-x-3 text-cyber-cyan">
+                        <i class="fa-solid fa-screwdriver-wrench text-2xl"></i>
+                        <h3 class="font-bold text-white text-lg">Security Tooling</h3>
+                    </div>
+                    <ul class="space-y-2 text-sm font-mono">
+                        <li class="flex justify-between items-center">
+                            <span>Wireshark & TShark</span>
+                            <span class="text-cyber-neon text-xs">Advanced</span>
+                        </li>
+                        <li class="flex justify-between items-center">
+                            <span>Nmap & Masscan</span>
+                            <span class="text-cyber-neon text-xs">Advanced</span>
+                        </li>
+                        <li class="flex justify-between items-center">
+                            <span>Burp Suite Community</span>
+                            <span class="text-cyber-cyan text-xs">Intermediate</span>
+                        </li>
+                        <li class="flex justify-between items-center">
+                            <span>Metasploit Framework</span>
+                            <span class="text-cyber-cyan text-xs">Intermediate</span>
+                        </li>
+                    </ul>
+                </div>
+
+                <!-- Programming & Automation -->
+                <div class="bg-cyber-card border border-cyber-border rounded-xl p-5 hover:border-cyber-purple/50 transition-all space-y-4">
+                    <div class="flex items-center space-x-3 text-cyber-purple">
+                        <i class="fa-solid fa-code text-2xl"></i>
+                        <h3 class="font-bold text-white text-lg">Scripting & Coding</h3>
+                    </div>
+                    <ul class="space-y-2 text-sm font-mono">
+                        <li class="flex justify-between items-center">
+                            <span>Python 3 (Security Scripts)</span>
+                            <span class="text-cyber-neon text-xs">Advanced</span>
+                        </li>
+                        <li class="flex justify-between items-center">
+                            <span>Regex & Log Parsing</span>
+                            <span class="text-cyber-cyan text-xs">Intermediate</span>
+                        </li>
+                        <li class="flex justify-between items-center">
+                            <span>HTML5/CSS & JS</span>
+                            <span class="text-cyber-cyan text-xs">Intermediate</span>
+                        </li>
+                        <li class="flex justify-between items-center">
+                            <span>Git & Version Control</span>
+                            <span class="text-cyber-neon text-xs">Advanced</span>
+                        </li>
+                    </ul>
+                </div>
+
+                <!-- Core Security Concepts -->
+                <div class="bg-cyber-card border border-cyber-border rounded-xl p-5 hover:border-cyber-red/50 transition-all space-y-4">
+                    <div class="flex items-center space-x-3 text-cyber-red">
+                        <i class="fa-solid fa-shield-halved text-2xl"></i>
+                        <h3 class="font-bold text-white text-lg">Concepts & Ops</h3>
+                    </div>
+                    <ul class="space-y-2 text-sm font-mono">
+                        <li class="flex justify-between items-center">
+                            <span>Network Traffic Analysis</span>
+                            <span class="text-cyber-neon text-xs">Advanced</span>
+                        </li>
+                        <li class="flex justify-between items-center">
+                            <span>SIEM & Elastic Search</span>
+                            <span class="text-cyber-cyan text-xs">Intermediate</span>
+                        </li>
+                        <li class="flex justify-between items-center">
+                            <span>Vulnerability Scanning</span>
+                            <span class="text-cyber-neon text-xs">Advanced</span>
+                        </li>
+                        <li class="flex justify-between items-center">
+                            <span>OWASP Top 10 Web Security</span>
+                            <span class="text-cyber-cyan text-xs">Intermediate</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <section id="labs" class="space-y-8">
+            <div class="flex flex-col md:flex-row md:items-end justify-between border-l-4 border-cyber-cyan pl-4">
+                <div>
+                    <h2 class="text-3xl font-extrabold text-white tracking-tight">Hands-On Home Labs & Projects</h2>
+                    <p class="text-cyber-text text-sm font-mono mt-1">// Practical defensive setups and security tooling built in isolated labs</p>
+                </div>
+                <span class="text-xs font-mono text-cyber-cyan mt-2 md:mt-0"><i class="fa-solid fa-circle-info mr-1"></i> Click card for lab breakdown</span>
+            </div>
+
+            <!-- Grid of Projects -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <!-- Project 1: Active Directory Lab -->
+                <div onclick="openProjectModal('project-1')" class="bg-cyber-card border border-cyber-border hover:border-cyber-neon rounded-xl p-6 transition-all duration-300 hover:-translate-y-1 cursor-pointer group">
+                    <div class="flex justify-between items-start mb-4">
+                        <div class="p-3 rounded-lg bg-cyber-dark text-cyber-neon border border-cyber-border">
+                            <i class="fa-solid fa-server text-2xl"></i>
+                        </div>
+                        <span class="text-xs font-mono px-2.5 py-1 rounded bg-cyber-dark text-cyber-neon border border-cyber-neon/30">Active Lab</span>
+                    </div>
+                    <h3 class="text-xl font-bold text-white group-hover:text-cyber-neon transition-colors">Active Directory Attack & Defense Lab</h3>
+                    <p class="text-cyber-text text-sm mt-2 leading-relaxed">
+                        Configured a Windows Server 2022 Active Directory domain in VirtualBox. Simulated Kerberoasting, AS-REP Roast attacks, and implemented Group Policy defenses.
+                    </p>
+                    <div class="flex flex-wrap gap-2 mt-4 text-xs font-mono text-cyber-cyan">
+                        <span class="px-2 py-0.5 bg-cyber-dark rounded border border-cyber-border">Windows Server</span>
+                        <span class="px-2 py-0.5 bg-cyber-dark rounded border border-cyber-border">Active Directory</span>
+                        <span class="px-2 py-0.5 bg-cyber-dark rounded border border-cyber-border">Kerberoasting</span>
+                        <span class="px-2 py-0.5 bg-cyber-dark rounded border border-cyber-border">Sysmon</span>
+                    </div>
+                    <div class="mt-4 pt-4 border-t border-cyber-border/60 flex items-center justify-between text-xs font-mono text-cyber-neon">
+                        <span>View Lab Architecture & Report</span>
+                        <i class="fa-solid fa-arrow-right group-hover:translate-x-1 transition-transform"></i>
+                    </div>
+                </div>
+
+                <!-- Project 2: Elastic SIEM Home Lab -->
+                <div onclick="openProjectModal('project-2')" class="bg-cyber-card border border-cyber-border hover:border-cyber-cyan rounded-xl p-6 transition-all duration-300 hover:-translate-y-1 cursor-pointer group">
+                    <div class="flex justify-between items-start mb-4">
+                        <div class="p-3 rounded-lg bg-cyber-dark text-cyber-cyan border border-cyber-border">
+                            <i class="fa-solid fa-chart-line text-2xl"></i>
+                        </div>
+                        <span class="text-xs font-mono px-2.5 py-1 rounded bg-cyber-dark text-cyber-cyan border border-cyber-cyan/30">SOC Operations</span>
+                    </div>
+                    <h3 class="text-xl font-bold text-white group-hover:text-cyber-cyan transition-colors">Elastic SIEM & Fleet Security Monitoring</h3>
+                    <p class="text-cyber-text text-sm mt-2 leading-relaxed">
+                        Deployed Elastic SIEM with Elastic Agent on Ubuntu & Windows endpoints. Wrote custom detection rules for brute-force SSH logins and privilege escalation attempts.
+                    </p>
+                    <div class="flex flex-wrap gap-2 mt-4 text-xs font-mono text-cyber-cyan">
+                        <span class="px-2 py-0.5 bg-cyber-dark rounded border border-cyber-border">Elastic SIEM</span>
+                        <span class="px-2 py-0.5 bg-cyber-dark rounded border border-cyber-border">Winlogbeat</span>
+                        <span class="px-2 py-0.5 bg-cyber-dark rounded border border-cyber-border">Threat Hunting</span>
+                        <span class="px-2 py-0.5 bg-cyber-dark rounded border border-cyber-border">KQL</span>
+                    </div>
+                    <div class="mt-4 pt-4 border-t border-cyber-border/60 flex items-center justify-between text-xs font-mono text-cyber-cyan">
+                        <span>View Lab Architecture & Report</span>
+                        <i class="fa-solid fa-arrow-right group-hover:translate-x-1 transition-transform"></i>
+                    </div>
+                </div>
+
+                <!-- Project 3: Custom Python Port Scanner -->
+                <div onclick="openProjectModal('project-3')" class="bg-cyber-card border border-cyber-border hover:border-cyber-purple rounded-xl p-6 transition-all duration-300 hover:-translate-y-1 cursor-pointer group">
+                    <div class="flex justify-between items-start mb-4">
+                        <div class="p-3 rounded-lg bg-cyber-dark text-cyber-purple border border-cyber-border">
+                            <i class="fa-brands fa-python text-2xl"></i>
+                        </div>
+                        <span class="text-xs font-mono px-2.5 py-1 rounded bg-cyber-dark text-cyber-purple border border-cyber-purple/30">Tooling</span>
+                    </div>
+                    <h3 class="text-xl font-bold text-white group-hover:text-cyber-purple transition-colors">Async Multi-Threaded Python Network Scanner</h3>
+                    <p class="text-cyber-text text-sm mt-2 leading-relaxed">
+                        Built a custom Python socket scanner capable of banner grabbing, TCP connect scanning, and concurrent port probes. Includes JSON report export functionality.
+                    </p>
+                    <div class="flex flex-wrap gap-2 mt-4 text-xs font-mono text-cyber-cyan">
+                        <span class="px-2 py-0.5 bg-cyber-dark rounded border border-cyber-border">Python 3</span>
+                        <span class="px-2 py-0.5 bg-cyber-dark rounded border border-cyber-border">Sockets</span>
+                        <span class="px-2 py-0.5 bg-cyber-dark rounded border border-cyber-border">Threading</span>
+                        <span class="px-2 py-0.5 bg-cyber-dark rounded border border-cyber-border">Network Security</span>
+                    </div>
+                    <div class="mt-4 pt-4 border-t border-cyber-border/60 flex items-center justify-between text-xs font-mono text-cyber-purple">
+                        <span>View Code Snippets & Guide</span>
+                        <i class="fa-solid fa-arrow-right group-hover:translate-x-1 transition-transform"></i>
+                    </div>
+                </div>
+
+                <!-- Project 4: Vulnerability Assessment Report -->
+                <div onclick="openProjectModal('project-4')" class="bg-cyber-card border border-cyber-border hover:border-cyber-red rounded-xl p-6 transition-all duration-300 hover:-translate-y-1 cursor-pointer group">
+                    <div class="flex justify-between items-start mb-4">
+                        <div class="p-3 rounded-lg bg-cyber-dark text-cyber-red border border-cyber-border">
+                            <i class="fa-solid fa-bug text-2xl"></i>
+                        </div>
+                        <span class="text-xs font-mono px-2.5 py-1 rounded bg-cyber-dark text-cyber-red border border-cyber-red/30">Assessment</span>
+                    </div>
+                    <h3 class="text-xl font-bold text-white group-hover:text-cyber-red transition-colors">Vulnerability Audit & Remediation Sample</h3>
+                    <p class="text-cyber-text text-sm mt-2 leading-relaxed">
+                        Executed a full security assessment against Metasploitable2 target machine. Formatted a realistic executive assessment report with risk scoring (CVSS) and mitigations.
+                    </p>
+                    <div class="flex flex-wrap gap-2 mt-4 text-xs font-mono text-cyber-cyan">
+                        <span class="px-2 py-0.5 bg-cyber-dark rounded border border-cyber-border">Nmap</span>
+                        <span class="px-2 py-0.5 bg-cyber-dark rounded border border-cyber-border">Nessus</span>
+                        <span class="px-2 py-0.5 bg-cyber-dark rounded border border-cyber-border">CVSS v3</span>
+                        <span class="px-2 py-0.5 bg-cyber-dark rounded border border-cyber-border">Reporting</span>
+                    </div>
+                    <div class="mt-4 pt-4 border-t border-cyber-border/60 flex items-center justify-between text-xs font-mono text-cyber-red">
+                        <span>View Report Breakdown</span>
+                        <i class="fa-solid fa-arrow-right group-hover:translate-x-1 transition-transform"></i>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="writeups" class="space-y-8">
+            <div class="border-l-4 border-cyber-purple pl-4">
+                <h2 class="text-3xl font-extrabold text-white tracking-tight">CTF Write-Ups & Security Blog</h2>
+                <p class="text-cyber-text text-sm font-mono mt-1">// Detailed solutions, room walk-throughs, and security concept explanations</p>
+            </div>
+
+            <!-- Search & Filter Controls -->
+            <div class="flex flex-col sm:flex-row gap-4 justify-between items-stretch sm:items-center bg-cyber-card p-4 rounded-xl border border-cyber-border">
+                <!-- Search Box -->
+                <div class="relative flex-grow max-w-md">
+                    <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-cyber-text text-sm"></i>
+                    <input type="text" id="writeup-search" onkeyup="filterWriteups()" placeholder="Search writeups by room name or tag..." class="w-full pl-9 pr-4 py-2 bg-cyber-dark border border-cyber-border rounded-lg text-sm text-white font-mono focus:outline-none focus:border-cyber-neon">
+                </div>
+
+                <!-- Platform Filters -->
+                <div class="flex flex-wrap gap-2 font-mono text-xs">
+                    <button onclick="setWriteupFilter('all')" class="writeup-filter-btn px-3 py-1.5 rounded-md bg-cyber-neon text-cyber-black font-bold" data-filter="all">All</button>
+                    <button onclick="setWriteupFilter('TryHackMe')" class="writeup-filter-btn px-3 py-1.5 rounded-md bg-cyber-dark border border-cyber-border text-cyber-text hover:text-white" data-filter="TryHackMe">TryHackMe</button>
+                    <button onclick="setWriteupFilter('HackTheBox')" class="writeup-filter-btn px-3 py-1.5 rounded-md bg-cyber-dark border border-cyber-border text-cyber-text hover:text-white" data-filter="HackTheBox">HackTheBox</button>
+                    <button onclick="setWriteupFilter('OverTheWire')" class="writeup-filter-btn px-3 py-1.5 rounded-md bg-cyber-dark border border-cyber-border text-cyber-text hover:text-white" data-filter="OverTheWire">OverTheWire</button>
+                </div>
+            </div>
+
+            <!-- Writeups Grid -->
+            <div id="writeups-grid" class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <!-- Writeup 1 -->
+                <article class="writeup-card bg-cyber-card border border-cyber-border rounded-xl p-5 hover:border-cyber-neon/50 transition-all flex flex-col justify-between" data-platform="TryHackMe" data-title="TryHackMe Linux Privilege Escalation" data-tags="linux privesc suid cron">
+                    <div>
+                        <div class="flex items-center justify-between text-xs font-mono mb-3">
+                            <span class="px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/30">Easy</span>
+                            <span class="text-cyber-text"><i class="fa-regular fa-calendar mr-1"></i> Oct 2026</span>
+                        </div>
+                        <h3 class="font-bold text-white text-lg hover:text-cyber-neon transition-colors cursor-pointer">THM: Linux Privilege Escalation Playground</h3>
+                        <p class="text-cyber-text text-sm mt-2 leading-relaxed">
+                            Comprehensive walkthrough demonstrating SUID binary exploitation, misconfigured Cron jobs, and sudo rights abuse.
+                        </p>
+                    </div>
+                    <div class="mt-4 pt-4 border-t border-cyber-border/60 flex items-center justify-between">
+                        <span class="text-xs font-mono text-cyber-cyan"><i class="fa-solid fa-tag mr-1"></i> TryHackMe</span>
+                        <a href="https://tryhackme.com" target="_blank" class="text-xs font-mono text-cyber-neon hover:underline flex items-center">
+                            Read Writeup <i class="fa-solid fa-arrow-up-right-from-square ml-1 text-[10px]"></i>
+                        </a>
+                    </div>
+                </article>
+
+                <!-- Writeup 2 -->
+                <article class="writeup-card bg-cyber-card border border-cyber-border rounded-xl p-5 hover:border-cyber-cyan/50 transition-all flex flex-col justify-between" data-platform="HackTheBox" data-title="Hack The Box Lame Machine Walkthrough" data-tags="samba smb metasploit easy">
+                    <div>
+                        <div class="flex items-center justify-between text-xs font-mono mb-3">
+                            <span class="px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/30">Easy</span>
+                            <span class="text-cyber-text"><i class="fa-regular fa-calendar mr-1"></i> Sep 2026</span>
+                        </div>
+                        <h3 class="font-bold text-white text-lg hover:text-cyber-cyan transition-colors cursor-pointer">HTB: Lame Walkthrough & Analysis</h3>
+                        <p class="text-cyber-text text-sm mt-2 leading-relaxed">
+                            Exploiting a classic vulnerable Samba service (CVE-2007-2447) and manual exploitation vs Metasploit payload setup.
+                        </p>
+                    </div>
+                    <div class="mt-4 pt-4 border-t border-cyber-border/60 flex items-center justify-between">
+                        <span class="text-xs font-mono text-cyber-cyan"><i class="fa-solid fa-tag mr-1"></i> HackTheBox</span>
+                        <a href="https://hackthebox.com" target="_blank" class="text-xs font-mono text-cyber-cyan hover:underline flex items-center">
+                            Read Writeup <i class="fa-solid fa-arrow-up-right-from-square ml-1 text-[10px]"></i>
+                        </a>
+                    </div>
+                </article>
+
+                <!-- Writeup 3 -->
+                <article class="writeup-card bg-cyber-card border border-cyber-border rounded-xl p-5 hover:border-cyber-purple/50 transition-all flex flex-col justify-between" data-platform="OverTheWire" data-title="OverTheWire Bandit Wargame Levels 0-20" data-tags="bash linux cli wargame ssh">
+                    <div>
+                        <div class="flex items-center justify-between text-xs font-mono mb-3">
+                            <span class="px-2 py-0.5 rounded bg-cyan-500/10 text-cyan-400 border border-cyan-500/30">Beginner-Intermediate</span>
+                            <span class="text-cyber-text"><i class="fa-regular fa-calendar mr-1"></i> Aug 2026</span>
+                        </div>
+                        <h3 class="font-bold text-white text-lg hover:text-cyber-purple transition-colors cursor-pointer">OverTheWire: Bandit Levels 0 to 20</h3>
+                        <p class="text-cyber-text text-sm mt-2 leading-relaxed">
+                            Essential Linux command line tricks, piping, base64 decoding, password searches, and SSH key authentication strategies.
+                        </p>
+                    </div>
+                    <div class="mt-4 pt-4 border-t border-cyber-border/60 flex items-center justify-between">
+                        <span class="text-xs font-mono text-cyber-cyan"><i class="fa-solid fa-tag mr-1"></i> OverTheWire</span>
+                        <a href="https://overthewire.org" target="_blank" class="text-xs font-mono text-cyber-purple hover:underline flex items-center">
+                            Read Writeup <i class="fa-solid fa-arrow-up-right-from-square ml-1 text-[10px]"></i>
+                        </a>
+                    </div>
+                </article>
+            </div>
+        </section>
+
+        <section id="certs" class="space-y-8">
+            <div class="border-l-4 border-cyber-neon pl-4">
+                <h2 class="text-3xl font-extrabold text-white tracking-tight">Certifications & Academic Roadmap</h2>
+                <p class="text-cyber-text text-sm font-mono mt-1">// Formal security certifications and continuous study goals</p>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                <!-- Cert 1 -->
+                <div class="bg-cyber-card border border-cyber-border rounded-xl p-5 flex items-center space-x-4">
+                    <div class="p-3 bg-cyber-dark rounded-lg text-cyber-neon border border-cyber-neon/30 text-2xl">
+                        <i class="fa-solid fa-certificate"></i>
+                    </div>
+                    <div>
+                        <span class="text-[10px] font-mono uppercase text-cyber-neon tracking-wider">In Progress</span>
+                        <h3 class="font-bold text-white text-base">CompTIA Security+</h3>
+                        <p class="text-xs text-cyber-text font-mono">Exam Target: Q4 2026</p>
+                    </div>
+                </div>
+
+                <!-- Cert 2 -->
+                <div class="bg-cyber-card border border-cyber-border rounded-xl p-5 flex items-center space-x-4">
+                    <div class="p-3 bg-cyber-dark rounded-lg text-cyber-cyan border border-cyber-cyan/30 text-2xl">
+                        <i class="fa-solid fa-user-ninja"></i>
+                    </div>
+                    <div>
+                        <span class="text-[10px] font-mono uppercase text-cyber-cyan tracking-wider">Active Study</span>
+                        <h3 class="font-bold text-white text-base">eJPT (eLearnSecurity)</h3>
+                        <p class="text-xs text-cyber-text font-mono">Junior Penetration Tester</p>
+                    </div>
+                </div>
+
+                <!-- Cert 3 -->
+                <div class="bg-cyber-card border border-cyber-border rounded-xl p-5 flex items-center space-x-4">
+                    <div class="p-3 bg-cyber-dark rounded-lg text-cyber-purple border border-cyber-purple/30 text-2xl">
+                        <i class="fa-solid fa-graduation-cap"></i>
+                    </div>
+                    <div>
+                        <span class="text-[10px] font-mono uppercase text-cyber-purple tracking-wider">Education</span>
+                        <h3 class="font-bold text-white text-base">B.Tech / Computer Science</h3>
+                        <p class="text-xs text-cyber-text font-mono">Cybersecurity Focus</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="contact" class="space-y-8">
+            <div class="border-l-4 border-cyber-red pl-4">
+                <h2 class="text-3xl font-extrabold text-white tracking-tight">Get In Touch</h2>
+                <p class="text-cyber-text text-sm font-mono mt-1">// Open for cybersecurity internships, entry-level SOC, and penetration testing opportunities</p>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+                <!-- Form Column -->
+                <div class="lg:col-span-7 bg-cyber-card border border-cyber-border rounded-xl p-6 sm:p-8 space-y-6">
+                    <form id="contact-form" onsubmit="handleFormSubmit(event)" class="space-y-4 font-mono text-sm">
+                        <div>
+                            <label class="block text-xs text-cyber-cyan mb-2">Your Name / Handle *</label>
+                            <input type="text" id="form-name" required placeholder="e.g. Alex Vance" class="w-full px-4 py-3 bg-cyber-dark border border-cyber-border rounded-lg text-white focus:outline-none focus:border-cyber-neon">
+                        </div>
+
+                        <div>
+                            <label class="block text-xs text-cyber-cyan mb-2">Your Email *</label>
+                            <input type="email" id="form-email" required placeholder="e.g. alex@example.com" class="w-full px-4 py-3 bg-cyber-dark border border-cyber-border rounded-lg text-white focus:outline-none focus:border-cyber-neon">
+                        </div>
+
+                        <div>
+                            <label class="block text-xs text-cyber-cyan mb-2">Message / Inquiry *</label>
+                            <textarea id="form-message" rows="4" required placeholder="State your inquiry or opportunity details..." class="w-full px-4 py-3 bg-cyber-dark border border-cyber-border rounded-lg text-white focus:outline-none focus:border-cyber-neon"></textarea>
+                        </div>
+
+                        <button type="submit" class="w-full bg-cyber-neon text-cyber-black font-bold py-3 rounded-lg hover:bg-cyber-neon/90 transition-all shadow-md hover:shadow-cyber-neon/20 flex items-center justify-center space-x-2">
+                            <i class="fa-solid fa-paper-plane"></i>
+                            <span>Send Secure Message</span>
+                        </button>
+                    </form>
+
+                    <!-- Alert Box -->
+                    <div id="form-alert" class="hidden p-4 rounded-lg bg-cyber-dark border border-cyber-neon text-cyber-neon text-xs font-mono">
+                        <i class="fa-solid fa-check-circle mr-2"></i> Message sent successfully! I will get back to you shortly.
+                    </div>
+                </div>
+
+                <!-- Info & Socials Column -->
+                <div class="lg:col-span-5 space-y-6">
+                    <div class="bg-cyber-card border border-cyber-border rounded-xl p-6 space-y-4">
+                        <h3 class="font-bold text-white text-lg border-b border-cyber-border pb-3">Contact Details</h3>
+                        <div class="space-y-3 font-mono text-xs">
+                            <div class="flex items-center space-x-3 text-cyber-text">
+                                <i class="fa-solid fa-envelope text-cyber-neon text-base"></i>
+                                <span>aditya.patil.sec@gmail.com</span>
+                            </div>
+                            <div class="flex items-center space-x-3 text-cyber-text">
+                                <i class="fa-solid fa-location-dot text-cyber-cyan text-base"></i>
+                                <span>India (Open to Remote & On-site)</span>
+                            </div>
+                            <div class="flex items-center space-x-3 text-cyber-text">
+                                <i class="fa-solid fa-shield text-cyber-purple text-base"></i>
+                                <span>PGP Key: <code class="text-cyber-cyan">4A91 82BC 321F 009B</code></span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Direct Platform Links -->
+                    <div class="bg-cyber-card border border-cyber-border rounded-xl p-6 space-y-4">
+                        <h3 class="font-bold text-white text-lg border-b border-cyber-border pb-3">Security Profiles</h3>
+                        <div class="grid grid-cols-2 gap-3 font-mono text-xs">
+                            <a href="https://github.com" target="_blank" class="p-3 bg-cyber-dark border border-cyber-border rounded-lg hover:border-white text-cyber-text hover:text-white flex items-center space-x-2">
+                                <i class="fa-brands fa-github text-base"></i>
+                                <span>GitHub</span>
+                            </a>
+                            <a href="https://linkedin.com" target="_blank" class="p-3 bg-cyber-dark border border-cyber-border rounded-lg hover:border-white text-cyber-text hover:text-white flex items-center space-x-2">
+                                <i class="fa-brands fa-linkedin text-base text-blue-400"></i>
+                                <span>LinkedIn</span>
+                            </a>
+                            <a href="https://tryhackme.com" target="_blank" class="p-3 bg-cyber-dark border border-cyber-border rounded-lg hover:border-cyber-red text-cyber-text hover:text-white flex items-center space-x-2">
+                                <i class="fa-solid fa-flag text-base text-red-500"></i>
+                                <span>TryHackMe</span>
+                            </a>
+                            <a href="https://hackthebox.com" target="_blank" class="p-3 bg-cyber-dark border border-cyber-border rounded-lg hover:border-cyber-neon text-cyber-text hover:text-white flex items-center space-x-2">
+                                <i class="fa-solid fa-cube text-base text-emerald-400"></i>
+                                <span>HackTheBox</span>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer class="border-t border-cyber-border bg-cyber-dark py-8 text-center font-mono text-xs text-cyber-text relative z-10">
+        <div class="max-w-7xl mx-auto px-4 space-y-2">
+            <p>© 2026 Aditya Patil. Built with custom HTML, CSS, & Vanilla JavaScript.</p>
+            <p class="text-cyber-text/60">Hosted on <span class="text-cyber-neon">GitHub Pages</span> | Cybersecurity Portfolio Template</p>
+        </div>
+    </footer>
+
+    
+    <!-- Deployment Guide Modal -->
+    <div id="deploy-modal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-cyber-dark border border-cyber-neon rounded-xl max-w-2xl w-full p-6 space-y-6 font-mono max-h-[90vh] overflow-y-auto">
+            <div class="flex justify-between items-center border-b border-cyber-border pb-4">
+                <h3 class="text-lg font-bold text-cyber-neon flex items-center space-x-2">
+                    <i class="fa-brands fa-github"></i>
+                    <span>Publishing to GitHub Pages</span>
+                </h3>
+                <button onclick="toggleModal('deploy-modal')" class="text-cyber-text hover:text-white text-lg">&times;</button>
+            </div>
+
+            <ol class="space-y-4 text-xs text-cyber-text leading-relaxed list-decimal pl-4">
+                <li>
+                    <strong class="text-white">Create Repository:</strong> Go to GitHub and create a new public repository named <code class="text-cyber-cyan">username.github.io</code> or <code class="text-cyber-cyan">portfolio</code>.
+                </li>
+                <li>
+                    <strong class="text-white">Save File:</strong> Save this complete code as <code class="text-cyber-neon">index.html</code> in your project folder.
+                </li>
+                <li>
+                    <strong class="text-white">Push to GitHub:</strong>
+                    <div class="bg-cyber-black p-3 rounded border border-cyber-border mt-2 font-mono text-cyber-neon relative group">
+                        <code>git init<br>git add index.html<br>git commit -m "Initial portfolio commit"<br>git branch -M main<br>git remote add origin https://github.com/your-user/your-repo.git<br>git push -u origin main</code>
+                    </div>
+                </li>
+                <li>
+                    <strong class="text-white">Enable Pages:</strong> Navigate to <span class="text-cyber-cyan">Settings -&gt; Pages</span> on GitHub. Set Source branch to <span class="text-cyber-neon">main</span> and folder to <span class="text-cyber-neon">/ (root)</span>. Click Save!
+                </li>
+            </ol>
+
+            <div class="pt-4 border-t border-cyber-border flex justify-end">
+                <button onclick="toggleModal('deploy-modal')" class="bg-cyber-neon text-cyber-black font-bold px-4 py-2 rounded text-xs">Got it!</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Lab Detail Modal Container -->
+    <div id="project-modal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-cyber-dark border border-cyber-cyan rounded-xl max-w-3xl w-full p-6 space-y-6 font-mono max-h-[90vh] overflow-y-auto">
+            <div class="flex justify-between items-center border-b border-cyber-border pb-4">
+                <h3 id="modal-project-title" class="text-xl font-bold text-white">Lab Title</h3>
+                <button onclick="toggleModal('project-modal')" class="text-cyber-text hover:text-white text-lg">&times;</button>
+            </div>
+
+            <div id="modal-project-content" class="space-y-4 text-xs text-cyber-text leading-relaxed">
+                <!-- Dynamic content loaded via JS -->
+            </div>
+
+            <div class="pt-4 border-t border-cyber-border flex justify-end">
+                <button onclick="toggleModal('project-modal')" class="bg-cyber-cyan text-cyber-black font-bold px-4 py-2 rounded text-xs">Close Breakdown</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        /* Matrix Digital Rain Animation */
+        const canvas = document.getElementById('matrix-canvas');
+        const ctx = canvas.getContext('2d');
+
+        function resizeCanvas() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        }
+        resizeCanvas();
+        window.addEventListener('resize', resizeCanvas);
+
+        const chars = '01ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz<>[]{}/*=+#';
+        const fontSize = 12;
+        let columns = Math.floor(canvas.width / fontSize);
+        let drops = Array(columns).fill(1);
+
+        function drawMatrix() {
+            ctx.fillStyle = 'rgba(10, 13, 20, 0.08)';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            ctx.fillStyle = '#00ffaa';
+            ctx.font = `${fontSize}px monospace`;
+
+            for (let i = 0; i < drops.length; i++) {
+                const text = chars[Math.floor(Math.random() * chars.length)];
+                ctx.fillText(text, i * fontSize, drops[i] * fontSize);
+
+                if (drops[i] * fontSize > canvas.height && Math.random() > 0.975) {
+                    drops[i] = 0;
+                }
+                drops[i]++;
+            }
+        }
+        setInterval(drawMatrix, 40);
+
+        /* Mobile Menu Toggle */
+        const mobileBtn = document.getElementById('mobile-menu-btn');
+        const mobileMenu = document.getElementById('mobile-menu');
+
+        mobileBtn.addEventListener('click', () => {
+            mobileMenu.classList.toggle('hidden');
+        });
+
+        /* Terminal Sandbox Logic */
+        const terminalInput = document.getElementById('terminal-input');
+        const terminalOutput = document.getElementById('terminal-output');
+
+        const commands = {
+            'help': `Available system commands:<br>
+                - <span class="text-cyber-neon">whoami</span>: Print user bio & career summary<br>
+                - <span class="text-cyber-cyan">skills</span>: List technical skill matrix<br>
+                - <span class="text-cyber-purple">projects</span>: Summarize home lab projects<br>
+                - <span class="text-cyber-neon">certs</span>: List certification roadmap<br>
+                - <span class="text-cyber-red">contact</span>: Display email & social endpoints<br>
+                - <span class="text-cyber-text">clear</span>: Clear terminal screen`,
+            
+            'whoami': `<span class="text-white">Aditya Patil</span> - Cybersecurity Student & Aspiring Security Analyst / PenTester based in India.<br>Passionate about threat hunting, network security, active directory security, and CTF writeups.`,
+            
+            'skills': `<span class="text-cyber-cyan">Skills Matrix:</span><br>
+                - OS: Linux (Ubuntu/Kali), Windows Server (Active Directory)<br>
+                - Tools: Wireshark, Nmap, Burp Suite, Metasploit, Elastic SIEM<br>
+                - Scripting: Python 3, Bash, Regex, Sockets<br>
+                - Defensive: Log Analysis, Vulnerability Management, Threat Detection`,
+
+            'projects': `<span class="text-cyber-purple">Home Labs Summary:</span><br>
+                1. Active Directory Attack & Defense Lab (Kerberoasting, Sysmon)<br>
+                2. Elastic SIEM & Fleet Security Monitoring<br>
+                3. Async Multi-Threaded Python Network Scanner<br>
+                4. Metasploitable2 Vulnerability Assessment Audit`,
+
+            'certs': `<span class="text-cyber-neon">Certifications:</span><br>
+                - CompTIA Security+ (Target Q4 2026)<br>
+                - eJPT (Junior Penetration Tester - Active Prep)`,
+
+            'contact': `<span class="text-cyber-red">Contact Endpoints:</span><br>
+                - Email: aditya.patil.sec@gmail.com<br>
+                - GitHub: https://github.com<br>
+                - LinkedIn: https://linkedin.com`
+        };
+
+        terminalInput.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') {
+                const cmd = terminalInput.value.trim().toLowerCase();
+                runCommand(cmd);
+                terminalInput.value = '';
+            }
+        });
+
+        function runCommand(cmd) {
+            if (!cmd) return;
+
+            const commandLine = document.createElement('div');
+            commandLine.innerHTML = `<span class="text-cyber-neon">aditya@sec-lab:~$</span> <span class="text-white">${escapeHtml(cmd)}</span>`;
+            terminalOutput.appendChild(commandLine);
+
+            const resultLine = document.createElement('div');
+            resultLine.className = 'pl-2 text-xs opacity-90';
+
+            if (cmd === 'clear') {
+                terminalOutput.innerHTML = '';
+                return;
+            } else if (commands[cmd]) {
+                resultLine.innerHTML = commands[cmd];
+            } else {
+                resultLine.innerHTML = `<span class="text-red-400">Command not found: ${escapeHtml(cmd)}. Type '<span class="text-cyber-neon">help</span>' for options.</span>`;
+            }
+
+            terminalOutput.appendChild(resultLine);
+            terminalOutput.scrollTop = terminalOutput.scrollHeight;
+        }
+
+        function escapeHtml(text) {
+            return text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+        }
+
+        /* Generic Modal Handler */
+        function toggleModal(modalId) {
+            const modal = document.getElementById(modalId);
+            modal.classList.toggle('hidden');
+        }
+
+        /* Detailed Lab Modal Data */
+        const projectDetails = {
+            'project-1': {
+                title: "Active Directory Attack & Defense Lab",
+                content: `
+                    <div class="space-y-3">
+                        <p><strong class="text-cyber-neon">Objective:</strong> Set up a fully functioning domain controller to study real-world enterprise attack vectors and detection mechanisms.</p>
+                        <div class="p-3 bg-cyber-black rounded border border-cyber-border font-mono text-xs">
+                            <span class="text-cyber-cyan">Topology:</span> Windows Server 2022 (DC) + Windows 10 Host + Kali Linux (Attacker)
+                        </div>
+                        <h4 class="text-white font-bold text-sm">Key Implementation Steps:</h4>
+                        <ul class="list-disc pl-5 space-y-1">
+                            <li>Installed Active Directory Domain Services (AD DS) and DNS on Windows Server.</li>
+                            <li>Created domain users, Service Principal Names (SPNs), and intentional weak password accounts for testing.</li>
+                            <li>Executed Kerberoasting attack using Impacket scripts and cracked hashes using Hashcat.</li>
+                            <li>Configured Sysmon and Windows Event Forwarding (WEF) to detect Event ID 4769 (Kerberos Ticket Operations).</li>
+                        </ul>
+                    </div>
+                `
+            },
+            'project-2': {
+                title: "Elastic SIEM & Fleet Security Monitoring",
+                content: `
+                    <div class="space-y-3">
+                        <p><strong class="text-cyber-cyan">Objective:</strong> Gain hands-on SIEM detection engineering experience by ingesting and analyzing endpoint telemetry.</p>
+                        <div class="p-3 bg-cyber-black rounded border border-cyber-border font-mono text-xs">
+                            <span class="text-cyber-neon">Stack:</span> Elastic Cloud/Local Instance + Elastic Agent + Fleet Server
+                        </div>
+                        <h4 class="text-white font-bold text-sm">Key Implementation Steps:</h4>
+                        <ul class="list-disc pl-5 space-y-1">
+                            <li>Installed Fleet Server and enrolled endpoint agents on Linux and Windows endpoints.</li>
+                            <li>Simulated brute-force SSH logins using Hydra and monitored real-time alerts in Elastic SIEM dashboard.</li>
+                            <li>Built custom Lucene/KQL detection rules for anomalous PowerShell execution patterns.</li>
+                        </ul>
+                    </div>
+                `
+            },
+            'project-3': {
+                title: "Async Multi-Threaded Python Network Scanner",
+                content: `
+                    <div class="space-y-3">
+                        <p><strong class="text-cyber-purple">Objective:</strong> Develop a light, high-speed custom network recon utility in Python to understand socket programming.</p>
+                        <h4 class="text-white font-bold text-sm">Code Highlights & Features:</h4>
+                        <ul class="list-disc pl-5 space-y-1">
+                            <li>Implemented multi-threading using Python's <code class="text-cyber-cyan">concurrent.futures</code> module for rapid port probes.</li>
+                            <li>Added raw banner grabbing for service identification (HTTP, SSH, FTP).</li>
+                            <li>Output format support for JSON export, usable in pipeline security workflows.</li>
+                        </ul>
+                    </div>
+                `
+            },
+            'project-4': {
+                title: "Vulnerability Audit & Remediation Sample",
+                content: `
+                    <div class="space-y-3">
+                        <p><strong class="text-cyber-red">Objective:</strong> Practice professional vulnerability assessment and technical report writing.</p>
+                        <h4 class="text-white font-bold text-sm">Report Summary:</h4>
+                        <ul class="list-disc pl-5 space-y-1">
+                            <li>Identified Critical vulnerability: Unauthenticated Remote Code Execution in VSFTPd 2.3.4.</li>
+                            <li>Mapped vulnerabilities to CVSS v3 metrics and MITRE ATT&CK Framework IDs.</li>
+                            <li>Provided executive summary alongside technical remediation steps for system administrators.</li>
+                        </ul>
+                    </div>
+                `
+            }
+        };
+
+        function openProjectModal(projectId) {
+            const detail = projectDetails[projectId];
+            if (detail) {
+                document.getElementById('modal-project-title').innerText = detail.title;
+                document.getElementById('modal-project-content').innerHTML = detail.content;
+                toggleModal('project-modal');
+            }
+        }
+
+        /* Writeup Filter & Search */
+        function filterWriteups() {
+            const query = document.getElementById('writeup-search').value.toLowerCase();
+            const cards = document.querySelectorAll('.writeup-card');
+
+            cards.forEach(card => {
+                const title = card.getAttribute('data-title').toLowerCase();
+                const tags = card.getAttribute('data-tags').toLowerCase();
+                
+                if (title.includes(query) || tags.includes(query)) {
+                    card.classList.remove('hidden');
+                } else {
+                    card.classList.add('hidden');
+                }
+            });
+        }
+
+        function setWriteupFilter(platform) {
+            const buttons = document.querySelectorAll('.writeup-filter-btn');
+            buttons.forEach(btn => {
+                if (btn.getAttribute('data-filter') === platform) {
+                    btn.className = 'writeup-filter-btn px-3 py-1.5 rounded-md bg-cyber-neon text-cyber-black font-bold';
+                } else {
+                    btn.className = 'writeup-filter-btn px-3 py-1.5 rounded-md bg-cyber-dark border border-cyber-border text-cyber-text hover:text-white';
+                }
+            });
+
+            const cards = document.querySelectorAll('.writeup-card');
+            cards.forEach(card => {
+                const cardPlatform = card.getAttribute('data-platform');
+                if (platform === 'all' || cardPlatform === platform) {
+                    card.classList.remove('hidden');
+                } else {
+                    card.classList.add('hidden');
+                }
+            });
+        }
+
+        /* Contact Form Submission Handler */
+        function handleFormSubmit(e) {
+            e.preventDefault();
+            const alertBox = document.getElementById('form-alert');
+            alertBox.classList.remove('hidden');
+            document.getElementById('contact-form').reset();
+            setTimeout(() => {
+                alertBox.classList.add('hidden');
+            }, 5000);
+        }
+    </script>
+</body>
+</html>
